@@ -23,12 +23,24 @@ struct GroceryDetailScreen: View {
        
     }
     
+    private func deleteGroceryItem(groceryItemId: UUID) {
+        Task {
+            do {
+                try await model.deleteGroceryItem(groceryCategoryId: groceryCategory.id, groceryItemId: groceryItemId)
+            }catch {
+                print(error.localizedDescription)
+            }
+            
+        }
+        
+    }
+    
     var body: some View {
         VStack {
             if model.groceryItems.isEmpty {
                 Text("No Grocery Items Found")
             } else {
-                GroceryItemListView(groceryItems: model.groceryItems)
+                GroceryItemListView(groceryItems: model.groceryItems, onDelete: deleteGroceryItem)
             }
         }.navigationTitle(groceryCategory.title)
             .toolbar {

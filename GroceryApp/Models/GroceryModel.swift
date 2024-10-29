@@ -27,6 +27,12 @@ class GroceryModel: ObservableObject {
         return registerResponseDTO
     }
     
+    func logout()  {
+        let defaults = UserDefaults.standard
+        defaults.removeObject(forKey: "userId")
+        defaults.removeObject(forKey: "authToken")
+    }
+    
     func login(username: String, password: String) async throws -> LoginResponseDTO {
         
         let loginPostData = ["username": username, "password": password]
@@ -43,6 +49,19 @@ class GroceryModel: ObservableObject {
         return loginResponseDTO
     }
     
+    func deleteGroceryItem(groceryCategoryId: UUID, groceryItemId: UUID) async throws {
+        guard let userId = UserDefaults.standard.userId else { return }
+        
+        let resource = Resource(url: Constants.urls.DeletegroceryItem(userId: userId, groceryCategoryId: groceryCategoryId, groceryItemId: groceryItemId), method: .delete, modelType: GroceryItemResponseDTO.self)
+        
+        let deletedGroceryItem = try await httpClient.load(resource)
+        
+        groceryItems = groceryItems.filter{ $0.id != deletedGroceryItem.id }
+        
+    }
+  
+        
+       
     func deleteGroceryCategory(_ groceryCategoryId: UUID) async throws {
         
         guard let userId = UserDefaults.standard.userId else { return }

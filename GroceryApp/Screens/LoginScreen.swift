@@ -26,6 +26,7 @@ struct LoginScreen: View {
             let loginResponseDTO = try await model.login(username: username, password: password)
             if loginResponseDTO.error {
                 errorMessage = loginResponseDTO.reason ?? "Unknown Error"
+                AppState.errorWrapper = ErrorWrapper(error: GroceryError.loginFailed, guidance: loginResponseDTO.reason ?? "Unknown Error")
             } else {
                 // toke the user to grocery categories screen lsit
                 AppState.routes.append(.groceryCategoryList)
@@ -33,6 +34,7 @@ struct LoginScreen: View {
             print(loginResponseDTO)
         }catch {
             errorMessage = error.localizedDescription
+            AppState.errorWrapper = ErrorWrapper(error: error, guidance: error.localizedDescription)
         }
  
     }
@@ -49,11 +51,20 @@ struct LoginScreen: View {
                     }
                 }.buttonStyle(.borderless)
                     .disabled(!isFormValid)
+                Spacer()
+                Button("Register") {
+                    AppState.routes.append(.register)
+                }.buttonStyle(.borderless)
             }
             Text(errorMessage)
             
         }
         .navigationTitle("Login")
+        .navigationBarBackButtonHidden(true)
+        .sheet(item: $AppState.errorWrapper) { errorWrapper in
+            ErrorView(errorWrapper: errorWrapper)
+                .presentationDetents([.fraction(0.25)])
+        }
     }
 }
 
